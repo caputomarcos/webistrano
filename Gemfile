@@ -13,7 +13,7 @@ gem "syntax",     '1.0.0'
 gem "capistrano", '~> 2.13'
 gem "open4",      '0.9.3'
 gem "version_fu", :git =>  'git://github.com/jmckible/version_fu.git'
-gem "exception_notification"
+#gem "exception_notification"
 gem 'devise'
 gem 'devise-encryptable'
 gem 'haml'

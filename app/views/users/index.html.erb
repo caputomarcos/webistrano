@@ -37,7 +37,7 @@
             <td>
               <%= user.disabled? ? '<span style="color:red"><strong>Disabled</strong></span>'.html_safe : '<span style="color:green"><strong>Enabled</strong></span>'.html_safe %>
             </td>
-            <td><%= user.created_at.to_s(:date_with_day) %></td>
+            <td><%= user.created_at.to_s %></td>
             <% if current_user.admin? || current_user == user %>
               <td><%= link_to image_tag('icons/png/blue/32x32/user.png', :width => '25',:height => '25', :title => "View user's profile"), user_path(user) %></td>
             <% end %>
