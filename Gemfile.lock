@@ -17,6 +17,7 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+<<<<<<< Updated upstream
     actionmailer (3.2.8)
       actionpack (= 3.2.8)
       mail (~> 2.4.4)
@@ -49,6 +50,7 @@ GEM
     bcrypt-ruby (3.0.1)
     builder (3.0.0)
     capistrano (2.13.4)
+    SyslogLogger (1.4.1)
       highline
       net-scp (>= 1.0.0)
       net-sftp (>= 2.0.0)
@@ -325,6 +327,7 @@ DEPENDENCIES
   delayed_job
   devise
   devise-encryptable
+  SyslogLogger (= 1.4.1)
   erubis
   exception_notification
   factory_girl_rails

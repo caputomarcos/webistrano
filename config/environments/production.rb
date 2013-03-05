@@ -1,5 +1,6 @@
+require 'syslog_logger'
 Webistrano::Application.configure do
-  # Settings specified here will take precedence over those in config/application.rb
+  # Settings specified here will take precedence over those in config/environment.rb
 
   # The production environment is meant for finished, "live" apps.
   # Code is not reloaded between requests
@@ -23,6 +24,7 @@ Webistrano::Application.configure do
 
   # Use a different logger for distributed setups
   # config.logger = SyslogLogger.new
+  config.logger = SyslogLogger.new "webistrano_p"
 
   # Use a different cache store in production
   # config.cache_store = :mem_cache_store

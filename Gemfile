@@ -3,7 +3,7 @@ source "http://rubygems.org"
 gem "whenever"
 gem "delayed_job"
 gem "daemons"
-gem 'bundler', "1.2.1"
+gem 'bundler', '1.2.4'
 gem "mysql2", "0.3.11"
 gem 'rails', '3.2.8'
 gem "erubis"
@@ -17,6 +17,7 @@ gem "exception_notification"
 gem 'devise'
 gem 'devise-encryptable'
 gem 'haml'
+gem 'SyslogLogger', '1.4.1'
 
 group :development do
   gem "debugger"

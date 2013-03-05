@@ -5,7 +5,7 @@
 body {
 	background-color: #F0F0F0;
 	background: url(/sti/deploy/images/peritor_theme/background.gif?1320153637) repeat;
-  background-attachment: fixed;
+  	background-attachment: fixed;
 	font-family: "Trebuchet MS", Verdana, serif;
 	line-height: 16px;
 }
@@ -440,14 +440,14 @@ div.small_box_bottom {
 	color: #005AA8;
 	padding: 15px 5px 12px 70px;
 	background: url(/sti/deploy/images/peritor_theme/warning.gif?1320153637) left center no-repeat;
-  background-position: 20px 0px;
+  	background-position: 20px 0px;
 }
 
 .flash_text_locking {
 	color: #005AA8;
 	padding: 15px 5px 12px 70px;
 	background: url(/sti/deploy/images/peritor_theme/locked.gif?1320153637) left center no-repeat;
-  background-position: 20px 0px;
+  	background-position: 20px 0px;
 }
 
 div.flash_box{
