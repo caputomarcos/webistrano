@@ -28,6 +28,7 @@
 <div class="box">
   <div class="box_top"></div>
   <div class="box_middle">
+<<<<<<< HEAD
     <p>
       <b>Name:</b>
       <%=h @stage.name %>
@@ -44,6 +45,13 @@
       <b>#Hosts:</b>
       <%=h @stage.hosts.count %>
     </p>
+    <% @stage.github_compare_url.tap do |compare_url| %>
+        <% if compare_url %>
+            <p>
+              <%= link_to("Commits since last deploy", compare_url, :target => "_blank") %></b>
+            </p>
+        <% end %>
+    <% end %>
     <!--alimaher-->
     <%if !current_user.read_only(@stage) || current_user.admin? %>
       <!--end alimaher-->

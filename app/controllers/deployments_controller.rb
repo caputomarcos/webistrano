@@ -41,8 +41,8 @@ class DeploymentsController < ApplicationController
   # POST /projects/1/stages/1/deployments.xml
   def create
     @deployment = Deployment.new
-
     if populate_deployment_and_fire
+      @deployment.url = project_stage_deployment_url(@project, @stage, @deployment)
       @deployment.deploy_in_background!
       respond_with(@deployment, :location => [@project, @stage, @deployment])
     else

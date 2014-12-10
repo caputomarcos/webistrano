@@ -34,7 +34,7 @@ class Deployment < ActiveRecord::Base
   attr_accessor :prompt_config
 
   attr_accessor :override_locking
-
+  attr_accessor :url
   after_create :add_stage_roles
 
   def self.lock_and_fire(&block)
@@ -97,6 +97,18 @@ class Deployment < ActiveRecord::Base
     self.status == STATUS_RUNNING
   end
 
+  def github_blob_url
+    return unless github_path = stage.project.configuration_parameters.find_by_name("github").try(:value)
+    "https://github.com/#{github_path}/tree/#{revision}"
+  end
+
+  def github_compare_url
+    return unless github_path = stage.project.configuration_parameters.find_by_name("github").try(:value)
+    return unless previous_deployment = stage.deployments.first(:conditions => ["created_at <= ? AND id != ? AND task IN (?) AND status = ?", created_at, id, Deployment::DEPLOY_TASKS, Deployment::STATUS_SUCCESS])
+    return if previous_deployment.revision == revision
+    "https://github.com/#{github_path}/compare/#{previous_deployment.revision}...#{revision}"
+  end
+  
   def status_in_html
     "<span class='deployment_status_#{self.status.gsub(/ /, '_')}'>#{self.status}</span>"
   end
@@ -104,21 +116,25 @@ class Deployment < ActiveRecord::Base
   def complete_with_error!
     save_completed_status!(STATUS_FAILED)
     notify_per_mail
+    notify_hipchat_on_complete
   end
 
   def complete_successfully!
     save_completed_status!(STATUS_SUCCESS)
     notify_per_mail
+    notify_hipchat_on_complete
   end
 
   def complete_canceled!
     save_completed_status!(STATUS_CANCELED)
     notify_per_mail
+    notify_hipchat_on_complete
   end
 
   # deploy through Webistrano::Deployer in background (== other process)
   # TODO - at the moment `Unix &` hack
   def deploy_in_background!
+    notify_hipchat_on_execute
     unless Rails.env.test?
       Rails.logger.info "Calling other ruby process in the background in order to deploy deployment #{self.id} (stage #{self.stage.id}/#{self.stage.name})"
 
@@ -242,4 +258,96 @@ private
     end
   end
 
+
+  def humanized_task
+    case task
+      when "deploy:stop"        then ["stopped", "stop", "stopping"]
+      when "deploy:setup"       then ["setup", "setup", "setting up"]
+      when "deploy:cleanup"     then ["cleaned up", "clean up", "cleanning up"]
+      when "deploy:rollback"    then ["rolled back", "rollback", "rolling back"]
+      when "deploy:migrate"     then ["migrated", "migrate", "migrating"]
+      when "deploy:web:disable" then ["disabled", "disable", "disabling"]
+      when "deploy:web:enable"  then ["enabled", "enable", "enabling"]
+      when "deploy:restart"     then ["restarted", "restart", "restarting"]
+      when "deploy:migrations"  then ["deployed and migrated", "deploy and migrate", "deploying and migrating"]
+      when "deploy"             then ["deployed", "deploy", "deploying"]
+      else [task, task, task]
+    end
+  end
+
+  def notify_hipchat_on_execute
+    return unless notify_hipchat?
+
+    message = []
+    message << "#{user.login.humanize} is"
+    if url.present?
+      message << "<a href=\"#{url}\">#{humanized_task.last}</a>"
+    else
+      message << humanized_task.last
+    end
+    message << "<b>#{stage.project.name.humanize}</b> on <b>#{stage.name}</b>"
+    if description.present?
+      message << "<pre>#{description.strip.gsub(/\r\n/, "\n")}</pre>"
+    end
+    message = message.join(" ")
+
+    hipchat_rooms.each do |room|
+      room.send("Deploy", message, :notify => true) rescue nil
+    end
+  end
+
+  def notify_hipchat_on_complete
+    return unless notify_hipchat?
+
+    color = "green"
+
+    action = case status
+      when STATUS_FAILED   then "failed to #{humanized_task[1]}"
+      when STATUS_SUCCESS  then "successfully #{humanized_task.first}"
+      when STATUS_CANCELED then "canceled #{humanized_task.last}"
+      else "#{status} #{humanized_task.last}"
+    end
+
+    time_units = []
+
+    if completed_at && created_at
+      time_elapsed = (completed_at - created_at).to_i
+      time_units << "#{(time_elapsed / 60).to_i}m" if time_elapsed > 60
+      time_units << "#{(time_elapsed % 60).to_i}s"
+    end
+
+    if canceled? || failed?
+      color = "red"
+    end
+
+    message = []
+    message << "#{user.login.humanize} #{action} <b>#{stage.project.name.humanize}</b>"
+    if success? && ["deploy", "deploy:migrations"].include?(task) && github_compare_url && revision
+      message << "@ <a href=\"#{github_compare_url}\"><code>#{revision.first(7)}</code></a>"
+    end
+    message << "on <b>#{stage.name}</b>"
+    message << "<i>(#{time_units.join(" ")})</i>" unless time_units.empty?
+    message = message.join(" ")
+
+    hipchat_rooms.each do |room|
+      room.send("Deploy", message, :notify => true, :color => color) rescue nil
+    end
+  end
+
+  def notify_hipchat?
+    [
+      :hipchat_token,
+      :hipchat_room_name
+    ].map { |option_name| stage.effective_configuration(option_name).try(:value) }.all?(&:present?)
+  end
+
+  def hipchat
+    @hipchat ||= HipChat::Client.new(stage.effective_configuration(:hipchat_token).value)
+  end
+
+  def hipchat_rooms
+    Array.wrap(stage.effective_configuration(:hipchat_room_name).value).map do |room_name|
+      hipchat[room_name]
+    end
+  end
 end

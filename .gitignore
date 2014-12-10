@@ -11,3 +11,4 @@ config/webistrano_config.rb
 public/stylesheets/*.css
 vendor/bundler
 .sass-cache/
+*.tmproj

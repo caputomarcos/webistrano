@@ -3,7 +3,7 @@ source "http://rubygems.org"
 gem "whenever"
 gem "delayed_job"
 gem "daemons"
-gem 'bundler', '1.2.4'
+gem 'bundler'
 gem "mysql2", "0.3.11"
 gem 'rails', '3.2.8'
 gem "erubis"
@@ -18,18 +18,16 @@ gem 'devise'
 gem 'devise-encryptable'
 gem 'haml'
 gem 'SyslogLogger', '1.4.1'
+gem "hipchat", "~> 0.8.0"
+
 
 group :development do
-  gem "debugger"
   gem 'guard-bundler'
   gem 'guard-livereload'
   gem 'rack-livereload'
-
 end
 
 group :test do
-  gem "debugger"
-  gem 'sqlite3-ruby', :require => 'sqlite3'
   gem 'test-unit'
   gem 'mocha'
   gem 'factory_girl_rails'
