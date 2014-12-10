@@ -16,6 +16,7 @@ class ProjectConfiguration < ConfigurationParameter
       'thin_rails' => Webistrano::Template::ThinRails,   
       'mod_rails' => Webistrano::Template::ModRails,
       'pure_file' => Webistrano::Template::PureFile,
+      'pure_php' => Webistrano::Template::PurePHP,
       'unicorn' => Webistrano::Template::Unicorn
     }
   end
